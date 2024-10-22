@@ -1,0 +1,1000 @@
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Thriller Night%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 7
+SELECT title, length as duration FROM film WHERE length <= 147
+SELECT title, rating FROM film WHERE rating = 'R'
+SELECT title FROM film WHERE release_year = 2021
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Animation')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 11
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Emma%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 11
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 376 ORDER BY r.rental_date DESC LIMIT 19
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 376
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 376
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 376 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 376 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 2 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 2 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 376 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 376 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 376 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 376 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 376
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 376
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('New York%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('Japan')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 376) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 376)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 376)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 2 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 11 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 376 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 376
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 147 - 10 AND 147 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Emma') AND LOWER(a.last_name) = LOWER('Williams') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Emma') AND LOWER(a.last_name) = LOWER('Williams') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 2 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 376 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 376 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 376 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 2 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 2 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 376 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 376 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 2 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 376 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 376 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Mystery Case%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 6
+SELECT title, length as duration FROM film WHERE length <= 157
+SELECT title, rating FROM film WHERE rating = 'R'
+SELECT title FROM film WHERE release_year = 2023
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Sci-Fi')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 14
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Mary%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 14
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 67 ORDER BY r.rental_date DESC LIMIT 25
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 67
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 67
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 67 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 67 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 10 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 10 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 67 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 67 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 67 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 67 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 67
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 67
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Toronto%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('USA')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 67) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 67)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 67)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 11 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 14 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 67 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 67
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 157 - 10 AND 157 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Mary') AND LOWER(a.last_name) = LOWER('Johnson') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Mary') AND LOWER(a.last_name) = LOWER('Johnson') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 11 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 67 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 67 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 67 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 10 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 11 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 67 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 67 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 10 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 67 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 67 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Action Hero%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 9
+SELECT title, length as duration FROM film WHERE length <= 129
+SELECT title, rating FROM film WHERE rating = 'NC-17'
+SELECT title FROM film WHERE release_year = 2021
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Crime')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 18
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('David%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 18
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 245 ORDER BY r.rental_date DESC LIMIT 20
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 245
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 245
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 245 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 245 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 8 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 8 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 245 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 245 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 245 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 245 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 245
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 245
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('London%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('France')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 245) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 245)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 245)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 12 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 18 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 245 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 245
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 129 - 10 AND 129 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('David') AND LOWER(a.last_name) = LOWER('Davis') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('David') AND LOWER(a.last_name) = LOWER('Davis') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 12 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 245 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 245 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 245 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 8 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 12 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 245 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 245 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 8 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 245 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 245 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Action Hero%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 14
+SELECT title, length as duration FROM film WHERE length <= 104
+SELECT title, rating FROM film WHERE rating = 'R'
+SELECT title FROM film WHERE release_year = 2021
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Mystery')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 12
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Mary%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 12
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 359 ORDER BY r.rental_date DESC LIMIT 28
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 359
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 359
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 359 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 359 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 7 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 7 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 359 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 359 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 359 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 359 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 359
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 359
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Sydney%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('France')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 359) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 359)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 359)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 4 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 12 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 359 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 359
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 104 - 10 AND 104 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Mary') AND LOWER(a.last_name) = LOWER('Wilson') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Mary') AND LOWER(a.last_name) = LOWER('Wilson') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 4 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 359 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 359 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 359 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 7 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 4 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 359 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 359 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 7 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 359 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 359 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Mystery Case%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 7
+SELECT title, length as duration FROM film WHERE length <= 119
+SELECT title, rating FROM film WHERE rating = 'NC-17'
+SELECT title FROM film WHERE release_year = 2021
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Family')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 9
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('John%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 9
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 445 ORDER BY r.rental_date DESC LIMIT 19
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 445
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 445
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 445 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 445 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 10 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 10 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 445 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 445 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 445 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 445 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 445
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 445
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Dubai%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('UK')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 445) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 445)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 445)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 10 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 9 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 445 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 445
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 119 - 10 AND 119 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('John') AND LOWER(a.last_name) = LOWER('Brown') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('John') AND LOWER(a.last_name) = LOWER('Brown') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 10 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 445 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 445 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 445 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 10 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 10 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 445 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 445 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 10 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 445 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 445 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Western Tale%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 7
+SELECT title, length as duration FROM film WHERE length <= 154
+SELECT title, rating FROM film WHERE rating = 'G'
+SELECT title FROM film WHERE release_year = 2023
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Musical')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 15
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Mary%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 15
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 257 ORDER BY r.rental_date DESC LIMIT 34
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 257
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 257
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 257 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 257 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 7 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 7 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 257 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 257 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 257 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 257 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 257
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 257
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Rome%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('China')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 257) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 257)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 257)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 6 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 15 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 257 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 257
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 154 - 10 AND 154 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Mary') AND LOWER(a.last_name) = LOWER('Williams') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Mary') AND LOWER(a.last_name) = LOWER('Williams') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 6 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 257 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 257 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 257 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 7 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 6 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 257 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 257 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 7 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 257 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 257 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Musical Show%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 14
+SELECT title, length as duration FROM film WHERE length <= 150
+SELECT title, rating FROM film WHERE rating = 'NC-17'
+SELECT title FROM film WHERE release_year = 2023
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Adventure')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 5
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Emma%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 5
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 83 ORDER BY r.rental_date DESC LIMIT 42
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 83
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 83
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 83 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 83 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 5 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 5 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 83 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 83 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 83 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 83 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 83
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 83
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Paris%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('Russia')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 83) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 83)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 83)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 7 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 5 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 83 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 83
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 150 - 10 AND 150 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Emma') AND LOWER(a.last_name) = LOWER('Williams') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Emma') AND LOWER(a.last_name) = LOWER('Williams') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 7 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 83 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 83 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 83 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 5 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 7 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 83 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 83 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 5 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 83 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 83 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Fantasy World%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 14
+SELECT title, length as duration FROM film WHERE length <= 111
+SELECT title, rating FROM film WHERE rating = 'G'
+SELECT title FROM film WHERE release_year = 2024
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Romance')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 14
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Michael%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 14
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 358 ORDER BY r.rental_date DESC LIMIT 47
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 358
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 358
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 358 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 358 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 3 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 3 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 358 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 358 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 358 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 358 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 358
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 358
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Moscow%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('UK')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 358) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 358)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 358)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 5 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 14 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2024 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 358 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 358
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 111 - 10 AND 111 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Michael') AND LOWER(a.last_name) = LOWER('Brown') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Michael') AND LOWER(a.last_name) = LOWER('Brown') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 5 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2024 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 358 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 358 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 358 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 3 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 5 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 358 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 358 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 3 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 358 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 358 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Horror House%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 5
+SELECT title, length as duration FROM film WHERE length <= 71
+SELECT title, rating FROM film WHERE rating = 'PG'
+SELECT title FROM film WHERE release_year = 2022
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Thriller')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 11
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Jennifer%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 11
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 422 ORDER BY r.rental_date DESC LIMIT 44
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 422
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 422
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 422 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 422 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 4 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 4 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 422 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 422 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 422 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 422 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 422
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 422
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Rome%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('UK')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 422) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 422)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 422)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 3 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 11 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2022 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 422 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 422
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 71 - 10 AND 71 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Jennifer') AND LOWER(a.last_name) = LOWER('Smith') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Jennifer') AND LOWER(a.last_name) = LOWER('Smith') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 3 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2022 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 422 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 422 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 422 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 4 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 3 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 422 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 422 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 4 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 422 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 422 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Detective Story%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 15
+SELECT title, length as duration FROM film WHERE length <= 61
+SELECT title, rating FROM film WHERE rating = 'R'
+SELECT title FROM film WHERE release_year = 2022
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Comedy')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 5
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Sarah%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 5
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 79 ORDER BY r.rental_date DESC LIMIT 14
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 79
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 79
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 79 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 79 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 6 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 6 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 79 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 79 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 79 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 79 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 79
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 79
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Dubai%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('France')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 79) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 79)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 79)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 8 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 5 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2022 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 79 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 79
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 61 - 10 AND 61 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Sarah') AND LOWER(a.last_name) = LOWER('Johnson') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Sarah') AND LOWER(a.last_name) = LOWER('Johnson') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 8 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2022 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 79 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 79 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 79 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 6 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 8 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 79 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 79 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 6 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 79 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 79 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Detective Story%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 12
+SELECT title, length as duration FROM film WHERE length <= 71
+SELECT title, rating FROM film WHERE rating = 'PG'
+SELECT title FROM film WHERE release_year = 2023
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Documentary')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 6
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Michael%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 6
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 163 ORDER BY r.rental_date DESC LIMIT 42
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 163
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 163
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 163 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 163 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 7 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 7 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 163 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 163 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 163 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 163 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 163
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 163
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Sydney%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('Singapore')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 163) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 163)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 163)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 11 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 6 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 163 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 163
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 71 - 10 AND 71 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Michael') AND LOWER(a.last_name) = LOWER('Miller') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Michael') AND LOWER(a.last_name) = LOWER('Miller') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 11 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 163 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 163 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 163 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 7 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 11 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 163 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 163 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 7 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 163 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 163 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Mystery Case%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 14
+SELECT title, length as duration FROM film WHERE length <= 170
+SELECT title, rating FROM film WHERE rating = 'G'
+SELECT title FROM film WHERE release_year = 2024
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Adventure')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 9
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Michael%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 9
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 403 ORDER BY r.rental_date DESC LIMIT 11
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 403
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 403
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 403 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 403 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 8 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 8 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 403 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 403 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 403 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 403 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 403
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 403
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Tokyo%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('France')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 403) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 403)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 403)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 10 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 9 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2024 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 403 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 403
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 170 - 10 AND 170 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Michael') AND LOWER(a.last_name) = LOWER('Brown') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Michael') AND LOWER(a.last_name) = LOWER('Brown') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 10 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2024 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 403 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 403 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 403 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 8 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 10 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 403 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 403 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 8 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 403 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 403 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Space Journey%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 7
+SELECT title, length as duration FROM film WHERE length <= 84
+SELECT title, rating FROM film WHERE rating = 'G'
+SELECT title FROM film WHERE release_year = 2020
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Romance')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 13
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Jennifer%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 13
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 253 ORDER BY r.rental_date DESC LIMIT 17
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 253
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 253
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 253 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 253 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 8 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 8 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 253 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 253 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 253 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 253 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 253
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 253
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Rome%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('UK')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 253) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 253)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 253)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 5 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 13 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2020 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 253 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 253
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 84 - 10 AND 84 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Jennifer') AND LOWER(a.last_name) = LOWER('Wilson') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Jennifer') AND LOWER(a.last_name) = LOWER('Wilson') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 5 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2020 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 253 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 253 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 253 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 8 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 5 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 253 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 253 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 8 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 253 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 253 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Historical Drama%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 13
+SELECT title, length as duration FROM film WHERE length <= 90
+SELECT title, rating FROM film WHERE rating = 'PG-13'
+SELECT title FROM film WHERE release_year = 2023
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Horror')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 16
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Mary%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 16
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 49 ORDER BY r.rental_date DESC LIMIT 30
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 49
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 49
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 49 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 49 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 10 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 10 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 49 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 49 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 49 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 49 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 49
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 49
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Sydney%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('France')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 49) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 49)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 49)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 10 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 16 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 49 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 49
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 90 - 10 AND 90 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Mary') AND LOWER(a.last_name) = LOWER('Miller') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Mary') AND LOWER(a.last_name) = LOWER('Miller') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 10 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 49 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 49 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 49 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 10 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 10 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 49 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 49 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 10 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 49 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 49 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Horror House%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 14
+SELECT title, length as duration FROM film WHERE length <= 147
+SELECT title, rating FROM film WHERE rating = 'G'
+SELECT title FROM film WHERE release_year = 2021
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Mystery')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 7
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Sarah%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 7
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 333 ORDER BY r.rental_date DESC LIMIT 22
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 333
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 333
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 333 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 333 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 7 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 7 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 333 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 333 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 333 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 333 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 333
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 333
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Singapore%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('Japan')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 333) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 333)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 333)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 12 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 7 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 333 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 333
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 147 - 10 AND 147 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Sarah') AND LOWER(a.last_name) = LOWER('Smith') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Sarah') AND LOWER(a.last_name) = LOWER('Smith') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 12 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2021 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 333 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 333 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 333 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 7 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 12 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 333 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 333 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 7 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 333 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 333 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Space Journey%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 12
+SELECT title, length as duration FROM film WHERE length <= 123
+SELECT title, rating FROM film WHERE rating = 'NC-17'
+SELECT title FROM film WHERE release_year = 2023
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Romance')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 6
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Sarah%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 6
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 202 ORDER BY r.rental_date DESC LIMIT 47
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 202
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 202
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 202 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 202 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 10 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 10 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 202 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 202 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 202 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 202 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 202
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 202
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('New York%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('Singapore')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 202) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 202)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 202)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 3 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 6 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 202 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 202
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 123 - 10 AND 123 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Sarah') AND LOWER(a.last_name) = LOWER('Williams') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Sarah') AND LOWER(a.last_name) = LOWER('Williams') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 3 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2023 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 202 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 202 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 202 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 10 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 3 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 202 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 202 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 10 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 202 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 202 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Mystery Case%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 15
+SELECT title, length as duration FROM film WHERE length <= 128
+SELECT title, rating FROM film WHERE rating = 'PG-13'
+SELECT title FROM film WHERE release_year = 2020
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Comedy')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 17
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Sarah%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 17
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 3 ORDER BY r.rental_date DESC LIMIT 16
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 3
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 3
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 3 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 3 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 2 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 2 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 3 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 3 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 3 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 3 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 3
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 3
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Sydney%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('Australia')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 3) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 3)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 3)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 4 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 17 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2020 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 3 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 3
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 128 - 10 AND 128 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Sarah') AND LOWER(a.last_name) = LOWER('Wilson') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Sarah') AND LOWER(a.last_name) = LOWER('Wilson') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 4 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2020 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 3 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 3 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 3 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 2 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 4 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 3 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 3 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 2 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 3 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 3 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Science Fiction%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 10
+SELECT title, length as duration FROM film WHERE length <= 157
+SELECT title, rating FROM film WHERE rating = 'G'
+SELECT title FROM film WHERE release_year = 2022
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Family')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 12
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Jennifer%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 12
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 53 ORDER BY r.rental_date DESC LIMIT 34
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 53
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 53
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 53 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 53 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 6 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 6 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 53 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 53 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 53 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 53 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 53
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 53
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Moscow%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('UK')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 53) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 53)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 53)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 3 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 12 ORDER BY rental_count DESC
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2022 GROUP BY f.film_id, f.title ORDER BY rental_count DESC LIMIT 10
+SELECT DATE_TRUNC('month', rental_date) as month, COUNT(*) as rental_count FROM rental WHERE customer_id = 53 GROUP BY DATE_TRUNC('month', rental_date) ORDER BY month
+SELECT NOW() - MAX(rental_date) as time_since_last_rental FROM rental WHERE customer_id = 53
+SELECT f.title, f.length as duration FROM film f WHERE f.length BETWEEN 157 - 10 AND 157 + 10
+SELECT f.rating, AVG(f.length) as avg_duration FROM film f GROUP BY f.rating
+SELECT a.first_name, a.last_name, f.title, f.release_year FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id WHERE LOWER(a.first_name) = LOWER('Jennifer') AND LOWER(a.last_name) = LOWER('Miller') ORDER BY f.release_year DESC
+SELECT a.first_name, a.last_name, c.name as category, COUNT(*) as films_in_category FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id JOIN film f ON fa.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(a.first_name) = LOWER('Jennifer') AND LOWER(a.last_name) = LOWER('Miller') GROUP BY a.first_name, a.last_name, c.name
+SELECT s.store_id, COUNT(*) as rental_count FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id WHERE EXTRACT(MONTH FROM r.rental_date) = 3 GROUP BY s.store_id
+SELECT s.store_id, SUM(p.amount) as total_revenue FROM store s JOIN inventory i ON s.store_id = i.store_id JOIN rental r ON i.inventory_id = r.inventory_id JOIN payment p ON r.rental_id = p.rental_id WHERE EXTRACT(YEAR FROM r.rental_date) = 2022 GROUP BY s.store_id
+SELECT c.name as category, COUNT(*) as rental_count, ROUND(AVG(f.rental_rate), 2) as avg_rental_rate FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 53 GROUP BY c.name ORDER BY rental_count DESC
+SELECT f.rating, COUNT(*) as film_count, AVG(f.rental_rate) as avg_rental_rate FROM film f GROUP BY f.rating
+SELECT f.rating, c.name as category, COUNT(*) as film_count FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id GROUP BY f.rating, c.name ORDER BY f.rating, film_count DESC
+SELECT f.title, EXTRACT(DAY FROM (r.return_date - r.rental_date)) as rental_duration FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 53 AND r.return_date IS NOT NULL
+SELECT AVG(EXTRACT(DAY FROM (r.return_date - r.rental_date))) as avg_rental_duration FROM rental r WHERE r.customer_id = 53 AND r.return_date IS NOT NULL
+SELECT l.name as language, COUNT(*) as film_count FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT l.name as language, AVG(f.rental_rate) as avg_rental_rate FROM film f JOIN language l ON f.language_id = l.language_id GROUP BY l.name
+SELECT s.first_name, s.last_name, COUNT(*) as rental_count FROM staff s JOIN rental r ON s.staff_id = r.staff_id WHERE s.store_id = 6 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT s.first_name, s.last_name, SUM(p.amount) as total_payments FROM staff s JOIN payment p ON s.staff_id = p.staff_id WHERE EXTRACT(MONTH FROM p.payment_date) = 3 GROUP BY s.staff_id, s.first_name, s.last_name
+SELECT f.title, f.special_features FROM film f WHERE f.special_features @> ARRAY['${feature}']
+SELECT unnest(special_features) as feature, COUNT(*) as feature_count FROM film GROUP BY feature ORDER BY feature_count DESC
+SELECT EXTRACT(DOW FROM payment_date) as day_of_week, AVG(amount) as avg_payment FROM payment WHERE customer_id = 53 GROUP BY EXTRACT(DOW FROM payment_date) ORDER BY day_of_week
+SELECT EXTRACT(HOUR FROM payment_date) as hour_of_day, COUNT(*) as payment_count FROM payment WHERE customer_id = 53 GROUP BY EXTRACT(HOUR FROM payment_date) ORDER BY hour_of_day
+SELECT c.name as category, DATE_TRUNC('month', r.rental_date) as month, COUNT(*) as rental_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id JOIN inventory i ON f.film_id = i.film_id JOIN rental r ON i.inventory_id = r.inventory_id GROUP BY c.name, DATE_TRUNC('month', r.rental_date) ORDER BY month DESC, rental_count DESC
+SELECT f.title, COUNT(r.rental_id) as rental_count, COUNT(i.inventory_id) as total_copies, ROUND(COUNT(r.rental_id)::NUMERIC / NULLIF(COUNT(i.inventory_id), 0), 2) as turnover_rate FROM film f JOIN inventory i ON f.film_id = i.film_id LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE i.store_id = 6 GROUP BY f.film_id, f.title HAVING COUNT(i.inventory_id) > 0 ORDER BY turnover_rate DESC
+SELECT EXTRACT(HOUR FROM r.rental_date) as hour_of_day, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 53 GROUP BY hour_of_day ORDER BY hour_of_day
+SELECT EXTRACT(DOW FROM r.rental_date) as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 53 GROUP BY day_of_week ORDER BY day_of_week
+SELECT title, description, release_year, rating FROM film WHERE LOWER(title) LIKE LOWER('%Love Story%')
+SELECT title, rental_rate FROM film WHERE rental_rate <= 10
+SELECT title, length as duration FROM film WHERE length <= 140
+SELECT title, rating FROM film WHERE rating = 'R'
+SELECT title FROM film WHERE release_year = 2020
+SELECT f.title, c.name as category FROM film f JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE LOWER(c.name) = LOWER('Adventure')
+SELECT DISTINCT c.name, COUNT(*) as film_count FROM category c JOIN film_category fc ON c.category_id = fc.category_id GROUP BY c.name HAVING COUNT(*) >= 16
+SELECT c.name, AVG(f.rental_rate) as avg_price FROM category c JOIN film_category fc ON c.category_id = fc.category_id JOIN film f ON fc.film_id = f.film_id GROUP BY c.name
+SELECT DISTINCT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE LOWER(a.first_name) LIKE LOWER('Sarah%')
+SELECT a.first_name, a.last_name, COUNT(*) as film_count FROM actor a JOIN film_actor fa ON a.actor_id = fa.actor_id GROUP BY a.actor_id, a.first_name, a.last_name HAVING COUNT(*) >= 16
+SELECT r.rental_date, f.title FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 96 ORDER BY r.rental_date DESC LIMIT 34
+SELECT COUNT(*) as total_rentals FROM rental WHERE customer_id = 96
+SELECT SUM(p.amount) as total_spent FROM payment p WHERE customer_id = 96
+SELECT f.title, r.rental_date FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE r.customer_id = 96 AND r.return_date IS NULL
+SELECT COUNT(*) as active_rentals FROM rental WHERE customer_id = 96 AND return_date IS NULL
+SELECT f.title, COUNT(i.inventory_id) as copies_available FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 4 GROUP BY f.film_id, f.title
+SELECT f.title FROM film f JOIN inventory i ON f.film_id = i.film_id WHERE i.store_id = 4 AND NOT EXISTS (SELECT 1 FROM rental r WHERE r.inventory_id = i.inventory_id AND r.return_date IS NULL)
+SELECT c.name as category, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id JOIN film_category fc ON f.film_id = fc.film_id JOIN category c ON fc.category_id = c.category_id WHERE r.customer_id = 96 GROUP BY c.name ORDER BY rental_count DESC
+SELECT EXTRACT(HOUR FROM rental_date) as hour, COUNT(*) as rental_count FROM rental WHERE customer_id = 96 GROUP BY EXTRACT(HOUR FROM rental_date) ORDER BY rental_count DESC
+SELECT TO_CHAR(r.rental_date, 'Day') as day_of_week, COUNT(*) as rental_count FROM rental r WHERE r.customer_id = 96 GROUP BY TO_CHAR(r.rental_date, 'Day'), EXTRACT(DOW FROM r.rental_date) ORDER BY EXTRACT(DOW FROM r.rental_date)
+SELECT DATE_TRUNC('month', payment_date) as month, SUM(amount) as total_spent FROM payment WHERE customer_id = 96 GROUP BY DATE_TRUNC('month', payment_date) ORDER BY month DESC
+SELECT AVG(amount) as avg_payment FROM payment WHERE customer_id = 96
+SELECT MAX(amount) as max_payment FROM payment WHERE customer_id = 96
+SELECT s.store_id, a.address, c.city FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id WHERE LOWER(c.city) LIKE LOWER('Dubai%')
+SELECT s.store_id, a.address FROM store s JOIN address a ON s.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN country co ON c.country_id = co.country_id WHERE LOWER(co.country) = LOWER('UK')
+SELECT f.title FROM film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id IN (SELECT DISTINCT fc2.category_id FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id JOIN film_category fc2 ON f2.film_id = fc2.film_id WHERE r.customer_id = 96) AND f.film_id NOT IN (SELECT DISTINCT f3.film_id FROM rental r2 JOIN inventory i2 ON r2.inventory_id = i2.inventory_id JOIN film f3 ON i2.film_id = f3.film_id WHERE r2.customer_id = 96)
+SELECT f.title FROM film f WHERE f.rating IN (SELECT DISTINCT f2.rating FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f2 ON i.film_id = f2.film_id WHERE r.customer_id = 96)
+SELECT f.title, COUNT(*) as rental_count FROM rental r JOIN inventory i ON r.inventory_id = i.inventory_id JOIN film f ON i.film_id = f.film_id WHERE EXTRACT(MONTH FROM r.rental_date) = 12 GROUP BY f.film_id, f.title HAVING COUNT(*) >= 16 ORDER BY rental_count DESC

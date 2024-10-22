@@ -9,3 +9,5 @@ target/
 **/*.rs.bk
 .venv
 .vscode
+
+**/*/__pycache__
