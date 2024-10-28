@@ -1,2 +1,2 @@
 [rust-analyzer]
-linkedProjects = ["Cargo.toml", "guepard_shield-ebpf/Cargo.toml"]
+linkedProjects = ["Cargo.toml", "shield-ebpf/Cargo.toml"]
